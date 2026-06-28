@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - INYECTOR YT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B0E14;
+            --bg-card: #181C25;
+            --primary: #1D70F5;
+            --text-main: #FFFFFF;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #12151C;
+            color: white;
+            font-family: inherit;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        hr {
+            border-color: var(--border);
+            border-bottom: none;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1><span style="color:#1D70F5;">Admin</span> INYECTOR YT <span style="font-size:14px; color:#10B981;">(Powered
+                by Firebase)</span></h1>
+
+        <!-- SECCIÓN DE ANUNCIOS -->
+        <div class="card" style="border-left: 4px solid #10B981;">
+            <h2>Gestor de Anuncios (Firebase Realtime)</h2>
+            <p style="font-size:12px; color:#9ca3af; margin-bottom: 15px;">
+                Este enlace se sincronizará automáticamente en todos los clientes al instante gracias a Firestore.
+            </p>
+            <div class="form-group">
+                <label>Link Directo (Ad URL)</label>
+                <input type="text" id="ad-url" placeholder="https://www.direct-ad-link.com/...">
+            </div>
+            <button onclick="guardarConfig()">Actualizar Anuncio Global</button>
+        </div>
+
+        <!-- SECCIÓN DE JUEGOS -->
+        <div class="card">
+            <h2>Publicar Nueva App / Script</h2>
+            <div class="grid">
+                <div class="form-group"><label>Título</label><input type="text" id="j-title"
+                        placeholder="Free Fire Mod Menu"></div>
+                <div class="form-group"><label>Categoría</label><input type="text" id="j-category"
+                        placeholder="Inyectores / Hacks"></div>
+                <div class="form-group"><label>Tamaño</label><input type="text" id="j-size" placeholder="Ej: 50 MB">
+                </div>
+                <div class="form-group"><label>URL de Imagen</label><input type="text" id="j-image"
+                        placeholder="https://..."></div>
+                <div class="form-group"><label>URL de APK Directa</label><input type="text" id="j-download"
+                        placeholder="Enlace de MediaFire o Mega"></div>
+            </div>
+            <div class="form-group">
+                <label>Descripción Larga (Aparecerá en los detalles)</label>
+                <textarea id="j-desc" rows="3" placeholder="Información sobre la actualización o el hack..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Marcar como VIP SCRIPT (Color Dorado)</label>
+                <select id="j-vip">
+                    <option value="false">No</option>
+                    <option value="true">Sí</option>
+                </select>
+            </div>
+            <button onclick="guardarJuegoEnFirebase()">Publicar en Firestore</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgjOiWnr_-c4gOYoEiZc2Fc69F_4lKurQ",
+            authDomain: "inyectorytapp.firebaseapp.com",
+            projectId: "inyectorytapp",
+            storageBucket: "inyectorytapp.firebasestorage.app",
+            messagingSenderId: "253288494165",
+            appId: "1:253288494165:web:d6bd09d3a365560c6ed0dc",
+            measurementId: "G-696ZLYVZ4T"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Cargar config actual de Ad al entrar
+        async function loadConfig() {
+            try {
+                const docSnap = await getDoc(doc(db, "config", "global"));
+                if (docSnap.exists()) {
+                    document.getElementById('ad-url').value = docSnap.data().globalAdUrl || '';
+                }
+            } catch (e) {
+                console.error("Firebase no configurado aún o reglas denegadas.");
+            }
+        }
+
+        window.guardarConfig = async () => {
+            const adUrl = document.getElementById('ad-url').value;
+            if (!adUrl) return alert("Escribe un enlace primero");
+
+            try {
+                await setDoc(doc(db, "config", "global"), { globalAdUrl: adUrl }, { merge: true });
+                alert("Anuncio Global Actualizado Exitosamente en Firebase!");
+            } catch (e) {
+                alert("Error guardando en Firestore: " + e.message);
+            }
+        };
+
+        window.guardarJuegoEnFirebase = async () => {
+            const nuevoJuego = {
+                title: document.getElementById('j-title').value,
+                category: document.getElementById('j-category').value,
+                size: document.getElementById('j-size').value,
+                rating: 5,
+                imageUrl: document.getElementById('j-image').value,
+                downloadUrl: document.getElementById('j-download').value,
+                description: document.getElementById('j-desc').value,
+                vip: document.getElementById('j-vip').value === "true",
+                timestamp: new Date().getTime() // Para ordenar los más recientes
+            };
+
+            if (!nuevoJuego.title || !nuevoJuego.imageUrl || !nuevoJuego.downloadUrl) {
+                return alert("Llena al menos el titulo, imagen y link de descarga");
+            }
+
+            try {
+                await addDoc(collection(db, "games"), nuevoJuego);
+                alert("¡App/Script publicado correctamente en Firestore!");
+                document.getElementById('j-title').value = '';
+                document.getElementById('j-desc').value = '';
+                document.getElementById('j-download').value = '';
+            } catch (e) {
+                alert("Error guardando en Firestore: " + e.message);
+            }
+        };
+
+        // Al iniciar el script
+        loadConfig();
+    </script>
+
+</body>
+
+</html>
