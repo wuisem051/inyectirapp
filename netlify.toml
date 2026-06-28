@@ -1,3 +1,3 @@
 [build]
-  command = ""
-  publish = "."
+  command = "mkdir -p public && cp index.html admin.html juegos.json config.json public/ || true"
+  publish = "public"
