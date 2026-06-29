@@ -4,151 +4,915 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - INYECTOR YT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Panel de Administración - INYECTOR YT</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js CDN for Analytics Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-main: #0B0E14;
-            --bg-card: #181C25;
+            --bg-card: #161A23;
+            --bg-input: #1D2331;
             --primary: #1D70F5;
+            --primary-rgb: 29, 112, 245;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F5C518;
             --text-main: #FFFFFF;
-            --border: rgba(255, 255, 255, 0.1);
+            --text-muted: #8E96A4;
+            --border: rgba(255, 255, 255, 0.06);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            margin: 0;
-            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(at 10% 20%, rgba(var(--primary-rgb), 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+        }
+
+        header {
+            background-color: rgba(18, 21, 28, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-logo span {
+            color: var(--primary);
+            text-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4);
+        }
+
+        .header-version {
+            font-size: 11px;
+            background-color: rgba(var(--primary-rgb), 0.15);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
+            padding: 30px 24px;
+            flex-grow: 1;
         }
 
-        .card {
-            background: var(--bg-card);
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CSS GRID STATS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
-        h1,
-        h2 {
-            margin-top: 0;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0.8;
+        }
+
+        .stat-card.success::before {
+            background: var(--success);
+        }
+
+        .stat-card.warning::before {
+            background: var(--warning);
+        }
+
+        .stat-card.danger::before {
+            background: var(--danger);
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            opacity: 0.08;
+            font-size: 48px;
+            pointer-events: none;
+        }
+
+        /* ── CHARTS SECTION ── */
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-box-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ── COUNTRY LIST ── */
+        .country-table-container {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .country-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .country-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .country-name {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .country-flag {
+            font-size: 16px;
+            border-radius: 3px;
+        }
+
+        .country-count {
+            font-size: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* ── APPS & CRUD SECTION ── */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .search-bar {
+            position: relative;
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 16px 11px 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            color: white;
+            font-size: 13px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.15);
+        }
+
+        .search-bar svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-plus {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.35);
+            transition: var(--transition);
+        }
+
+        .btn-plus:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        /* ── TABLE VIEW ── */
+        .table-responsive {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow-x: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 13.5px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .game-title-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .game-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .game-title-text {
+            font-weight: 700;
+        }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .badge-vip {
+            background-color: rgba(245, 197, 24, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 197, 24, 0.3);
+        }
+
+        .badge-regular {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: rgba(255, 255, 255, 0.02);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-action.edit:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-action.delete:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* ── MODAL FORM ── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: modalOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            overflow: hidden;
+        }
+
+        @keyframes modalOpen {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background-color: rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
+            gap: 6px;
         }
 
-        label {
-            margin-bottom: 5px;
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 13px;
             font-weight: 600;
-            font-size: 14px;
-            color: #d1d5db;
+            color: var(--text-muted);
         }
 
-        input,
-        select,
-        textarea {
-            padding: 10px;
-            border-radius: 6px;
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 11px 14px;
+            border-radius: 8px;
             border: 1px solid var(--border);
-            background: #12151C;
+            background-color: var(--bg-input);
             color: white;
-            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: var(--transition);
         }
 
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: 800;
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.15);
+        }
+
+        .input-with-preview {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .image-preview-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            object-fit: cover;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .image-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: var(--transition);
         }
 
-        button:hover {
-            opacity: 0.9;
+        .btn-cancel:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-color: var(--text-muted);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        /* ── MONETIZATION CARD ── */
+        .ad-manager-card {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--success);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 680px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
 
-        hr {
-            border-color: var(--border);
-            border-bottom: none;
-            margin: 20px 0;
+        .ad-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .ad-header svg {
+            color: var(--success);
+            width: 24px;
+            height: 24px;
+        }
+
+        .ad-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .ad-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* ── TOAST NOTIFICATION ── */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            transform: translateY(100px);
+            opacity: 0;
+            background-color: rgba(30, 35, 45, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .p-20 {
+            padding: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <h1><span style="color:#1D70F5;">Admin</span> INYECTOR YT <span style="font-size:14px; color:#10B981;">(Powered
-                by Firebase)</span></h1>
+    <header>
+        <div class="header-logo">
+            <span>🛡️ Panel Admin</span> INYECTOR YT <div class="header-version">v2.0</div>
+        </div>
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                📊 Dashboard
+            </button>
+            <button class="tab-btn" onclick="switchTab('apps')">
+                🎮 Apps & Scripts
+            </button>
+            <button class="tab-btn" onclick="switchTab('anuncios')">
+                📢 Monetización
+            </button>
+        </nav>
+    </header>
 
-        <!-- SECCIÓN DE ANUNCIOS -->
-        <div class="card" style="border-left: 4px solid #10B981;">
-            <h2>Gestor de Anuncios (Firebase Realtime)</h2>
-            <p style="font-size:12px; color:#9ca3af; margin-bottom: 15px;">
-                Este enlace se sincronizará automáticamente en todos los clientes al instante gracias a Firestore.
-            </p>
-            <div class="form-group">
-                <label>Link Directo (Ad URL)</label>
-                <input type="text" id="ad-url" placeholder="https://www.direct-ad-link.com/...">
+    <div class="container">
+
+        <!-- ═══════════════ TAB: DASHBOARD ═══════════════ -->
+        <div id="tab-content-dashboard" class="view-content active">
+            <!-- Grid Estadísticas Generales -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Productos Registrados</div>
+                    <div class="stat-value" id="stats-total-apps">0</div>
+                    <div class="stat-subtitle">Apks y Scripts activos</div>
+                    <div class="stat-icon">🎮</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-title">Instalaciones Totales</div>
+                    <div class="stat-value" id="stats-total-installs">0</div>
+                    <div class="stat-subtitle">Instalaciones de app Android</div>
+                    <div class="stat-icon">📥</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-title">Descargas Totales</div>
+                    <div class="stat-value" id="stats-total-downloads">0</div>
+                    <div class="stat-subtitle">Clicks directos desbloqueados</div>
+                    <div class="stat-icon">🔥</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-title">Países Inscritos</div>
+                    <div class="stat-value" id="stats-total-countries">0</div>
+                    <div class="stat-subtitle">Alcance del mercado internacional</div>
+                    <div class="stat-icon">🌎</div>
+                </div>
             </div>
-            <button onclick="guardarConfig()">Actualizar Anuncio Global</button>
+
+            <!-- Gráficas Estadísticas -->
+            <div class="dashboard-row">
+                <!-- Gráfica de Descargas de Apps -->
+                <div class="chart-box">
+                    <div class="chart-box-title">Descargas por Producto (Descargas Totales)</div>
+                    <div class="chart-container" style="position: relative; height: 350px;">
+                        <canvas id="chart-downloads"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabla e Historial de Países -->
+                <div class="chart-box">
+                    <div class="chart-box-title">Instalaciones por País</div>
+                    <div class="chart-container" style="position: relative; height:180px; margin-bottom: 20px;">
+                        <canvas id="chart-countries"></canvas>
+                    </div>
+                    <div class="country-table-container" id="country-list">
+                        <div class="text-center p-20" style="color: var(--text-muted);">
+                            Cargando países...
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- SECCIÓN DE JUEGOS -->
-        <div class="card">
-            <h2>Publicar Nueva App / Script</h2>
-            <div class="grid">
-                <div class="form-group"><label>Título</label><input type="text" id="j-title"
-                        placeholder="Free Fire Mod Menu"></div>
-                <div class="form-group"><label>Categoría</label><input type="text" id="j-category"
-                        placeholder="Inyectores / Hacks"></div>
-                <div class="form-group"><label>Tamaño</label><input type="text" id="j-size" placeholder="Ej: 50 MB">
+        <!-- ═══════════════ TAB: APPS & SCRIPTS ═══════════════ -->
+        <div id="tab-content-apps" class="view-content">
+            <div class="section-header">
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="app-search" placeholder="Buscar app o script..."
+                        onkeyup="filterAppsTable()">
                 </div>
-                <div class="form-group"><label>URL de Imagen</label><input type="text" id="j-image"
-                        placeholder="https://..."></div>
-                <div class="form-group"><label>URL de APK Directa</label><input type="text" id="j-download"
-                        placeholder="Enlace de MediaFire o Mega"></div>
+                <button class="btn-plus" onclick="openModal()">
+                    ➕ Registrar Nueva App
+                </button>
             </div>
-            <div class="form-group">
-                <label>Descripción Larga (Aparecerá en los detalles)</label>
-                <textarea id="j-desc" rows="3" placeholder="Información sobre la actualización o el hack..."></textarea>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto / Script</th>
+                            <th>Categoría</th>
+                            <th>Tamaño</th>
+                            <th>Tipo</th>
+                            <th style="text-align: center;">Descargas Count</th>
+                            <th>Enlace Descarga</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="games-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center p-20" style="color: var(--text-muted);">
+                                Sincronizando datos con Firestore...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="form-group">
-                <label>Marcar como VIP SCRIPT (Color Dorado)</label>
-                <select id="j-vip">
-                    <option value="false">No</option>
-                    <option value="true">Sí</option>
-                </select>
+        </div>
+
+        <!-- ═══════════════ TAB: MONETIZACION ═══════════════ -->
+        <div id="tab-content-anuncios" class="view-content">
+            <div class="ad-manager-card">
+                <div class="ad-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <div class="ad-title">Gestión de Publicidad Global</div>
+                </div>
+                <div class="ad-desc">
+                    El enlace del anuncio redireccionará de forma forzada cuando el usuario intente descargar cualquier
+                    app.
+                    El contador define cuántos segundos se le obligará al usuario a esperar antes de habilitar el botón
+                    "INSTALAR".
+                </div>
+
+                <div class="form-group">
+                    <label>Enlace del Patrocinador Activo (Ad Link URL)</label>
+                    <input type="text" id="cfg-ad-url" placeholder="https://www.google.com/search?q=publicidad">
+                </div>
+
+                <div class="form-group">
+                    <label>Segundos de Espera (Ad Countdown Segs)</label>
+                    <input type="number" id="cfg-countdown" min="0" max="60" placeholder="Ej: 5">
+                </div>
+
+                <button class="btn-plus" style="margin-top: 10px;" onclick="saveMonetizationConfig()">
+                    💾 Guardar Configuración Global
+                </button>
             </div>
-            <button onclick="guardarJuegoEnFirebase()">Publicar en Firestore</button>
+        </div>
+
+    </div>
+
+    <!-- MODAL FORM (REGISTRO & EDICIÓN) -->
+    <div class="modal" id="app-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title-text">Publicar Nueva App / Script</div>
+                <button class="btn-action" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Título del Juego o Script</label>
+                        <input type="text" id="form-title" placeholder="Ej: Free Fire VIP Mod">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" id="form-category" placeholder="Ej: VIP Mods, Inyectores">
+                    </div>
+                    <div class="form-group">
+                        <label>Tamaño en MB / GB</label>
+                        <input type="text" id="form-size" placeholder="Ej: 42 MB">
+                    </div>
+                    <div class="form-group">
+                        <label>Marcar como VIP SCRIPT</label>
+                        <select id="form-vip">
+                            <option value="false">No (Estándar)</option>
+                            <option value="true">Sí (Dorado - VIP)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>URL Directa de la Imagen de Icono</label>
+                        <div class="input-with-preview">
+                            <div class="image-preview-box">
+                                <img id="preview-img" src="" style="display:none;" />
+                                <span id="preview-placeholder">🖼️</span>
+                            </div>
+                            <input type="text" id="form-image" style="flex-grow:1;"
+                                placeholder="https://unsplash.com/..." oninput="updateImagePreview(this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Enlace Directo de la APK (Download Link)</label>
+                        <input type="text" id="form-download" placeholder="https://mediafire.com/file/...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Descripción Larga (Notas de la versión, etc.)</label>
+                        <textarea id="form-desc" rows="3"
+                            placeholder="Describe los hacks, comandos o especificaciones de este script"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-plus" id="btn-submit-form" onclick="submitAppForm()">Publicar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- TOAST POPUP -->
+    <div id="toast">
+        <span id="toast-message">Guardado con éxito</span>
+    </div>
+
+    <!-- MODULE SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDgjOiWnr_-c4gOYoEiZc2Fc69F_4lKurQ",
             authDomain: "inyectorytapp.firebaseapp.com",
@@ -162,62 +926,425 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Cargar config actual de Ad al entrar
-        async function loadConfig() {
+        // Core Admin state
+        let globalGames = [];
+        let editingId = null;
+
+        let chartDownloadsInstance = null;
+        let chartCountriesInstance = null;
+
+        // Initialize Realtime snapshot updates
+        onSnapshot(collection(db, "games"), (snapshot) => {
+            globalGames = [];
+            snapshot.forEach(d => {
+                globalGames.push({ id: d.id, ...d.data() });
+            });
+            globalGames.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            renderGamesTable();
+            updateStatsAndCharts();
+        }, (err) => {
+            console.error("Error sincronizando juegos:", err);
+            showToast("❌ Error al leer la base de datos.");
+        });
+
+        // Sync Global Ad Configuration
+        async function loadAdConfig() {
             try {
-                const docSnap = await getDoc(doc(db, "config", "global"));
-                if (docSnap.exists()) {
-                    document.getElementById('ad-url').value = docSnap.data().globalAdUrl || '';
+                const snap = await getDoc(doc(db, "config", "global"));
+                if (snap.exists()) {
+                    document.getElementById('cfg-ad-url').value = snap.data().globalAdUrl || '';
+                    document.getElementById('cfg-countdown').value = snap.data().adCountdown !== undefined ? snap.data().adCountdown : '5';
                 }
-            } catch (e) {
-                console.error("Firebase no configurado aún o reglas denegadas.");
+            } catch (err) {
+                console.error("No se pudo cargar la config publicitaria:", err);
+            }
+        }
+        loadAdConfig();
+
+        // ── Navigation ──
+        window.switchTab = function (tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-content').forEach(view => view.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.innerText.toLowerCase().includes(tabName.toLowerCase()));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const view = document.getElementById('tab-content-' + tabName);
+            if (view) view.classList.add('active');
+
+            if (tabName === 'dashboard') {
+                updateStatsAndCharts();
+            }
+        };
+
+        // ── Render Games Table ──
+        function renderGamesTable() {
+            const tbody = document.getElementById('games-table-body');
+            if (globalGames.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-20">No hay productos registrados. Pulsa "Registrar Nueva App" para crear uno.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = globalGames.map(game => {
+                const isVip = game.vip || false;
+                const badgeClass = isVip ? 'badge badge-vip' : 'badge badge-regular';
+                const vipText = isVip ? 'VIP SCRIPT' : 'Estándar';
+                const downloads = game.downloadsCount || 0;
+
+                return `
+                    <tr id="row-${game.id}">
+                        <td>
+                            <div class="game-title-cell">
+                                <img src="${game.imageUrl}" class="game-thumb" alt="${game.title}" onerror="this.src='https://via.placeholder.com/60'">
+                                <div class="game-title-text">${game.title}</div>
+                            </div>
+                        </td>
+                        <td>${game.category || 'Mods'}</td>
+                        <td>${game.size || 'Varia'}</td>
+                        <td><span class="${badgeClass}">${vipText}</span></td>
+                        <td style="text-align: center; font-weight: 700; color: var(--success);">${downloads}</td>
+                        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <a href="${game.downloadUrl}" target="_blank" style="color: var(--primary); text-decoration: none; font-size:12px;">URL Descarga 🔗</a>
+                        </td>
+                        <td>
+                            <div class="actions-cell" style="justify-content: center;">
+                                <button class="btn-action edit" title="Editar" onclick="editGame('${game.id}')">
+                                    ✏️
+                                </button>
+                                <button class="btn-action delete" title="Eliminar" onclick="confirmDeleteGame('${game.id}', '${game.title.replace(/'/g, "\\'")}')">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ── Filter table list ──
+        window.filterAppsTable = function () {
+            const query = document.getElementById('app-search').value.toLowerCase();
+            const rows = document.getElementById('games-table-body').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].innerText.toLowerCase();
+                if (text.includes(query) || rows[i].id === '') {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        };
+
+        // ── Analytics & Charts Aggregations ──
+        async function updateStatsAndCharts() {
+            try {
+                // Fetch Installs
+                const installsSnap = await getDocs(collection(db, "installs"));
+                const countryMap = {};
+                let totalInstalls = 0;
+
+                installsSnap.forEach(d => {
+                    const data = d.data();
+                    const country = data.country || 'Unknown';
+                    countryMap[country] = (countryMap[country] || 0) + 1;
+                    totalInstalls++;
+                });
+
+                // Fetch Downloads Log
+                const dlLogSnap = await getDocs(collection(db, "downloads_log"));
+                let totalDownloadsEvent = 0;
+                dlLogSnap.forEach(() => {
+                    totalDownloadsEvent++;
+                });
+
+                // Sum directly from Games collection downloadsCount
+                let totalGamesDownloads = 0;
+                globalGames.forEach(g => {
+                    totalGamesDownloads += (g.downloadsCount || 0);
+                });
+
+                const finalDownloadsSum = Math.max(totalGamesDownloads, totalDownloadsEvent);
+
+                // Update Stats text
+                document.getElementById('stats-total-apps').textContent = globalGames.length;
+                document.getElementById('stats-total-installs').textContent = totalInstalls;
+                document.getElementById('stats-total-downloads').textContent = finalDownloadsSum;
+
+                const uniqueCountries = Object.keys(countryMap).length;
+                document.getElementById('stats-total-countries').textContent = uniqueCountries;
+
+                // Render Top Countries Table
+                renderCountryList(countryMap);
+
+                // Update Charts
+                renderCharts(globalGames, countryMap);
+
+            } catch (err) {
+                console.error("Error cargando dashboard analytics:", err);
             }
         }
 
-        window.guardarConfig = async () => {
-            const adUrl = document.getElementById('ad-url').value;
-            if (!adUrl) return alert("Escribe un enlace primero");
+        // Render Country table
+        function renderCountryList(countryMap) {
+            const container = document.getElementById('country-list');
+            const sortedCountries = Object.entries(countryMap).sort((a, b) => b[1] - a[1]);
+
+            if (sortedCountries.length === 0) {
+                container.innerHTML = `<div class="text-center p-20" style="color: var(--text-muted);">No se detectaron instalaciones registradas.</div>`;
+                return;
+            }
+
+            container.innerHTML = sortedCountries.map(([country, count]) => {
+                // Return emoji flags if matches country common ones
+                let flag = '📍';
+                const lowerCountry = country.toLowerCase();
+                if (lowerCountry.includes('mexic')) flag = '🇲🇽';
+                else if (lowerCountry.includes('colomb')) flag = '🇨🇴';
+                else if (lowerCountry.includes('argentin')) flag = '🇦🇷';
+                else if (lowerCountry.includes('venezuel')) flag = '🇻🇪';
+                else if (lowerCountry.includes('peru') || lowerCountry.includes('perú')) flag = '🇵🇪';
+                else if (lowerCountry.includes('ecuador')) flag = '🇪🇨';
+                else if (lowerCountry.includes('brazil') || lowerCountry.includes('brasil')) flag = '🇧🇷';
+                else if (lowerCountry.includes('chile')) flag = '🇨🇱';
+                else if (lowerCountry.includes('united states') || lowerCountry.includes('usa')) flag = '🇺🇸';
+                else if (lowerCountry.includes('spain') || lowerCountry.includes('españ')) flag = '🇪🇸';
+                else if (lowerCountry.includes('uruguay')) flag = '🇺🇾';
+                else if (lowerCountry.includes('bolivia')) flag = '🇧🇴';
+
+                return `
+                    <div class="country-list-item">
+                        <div class="country-name">
+                            <span class="country-flag">${flag}</span> ${country}
+                        </div>
+                        <span class="country-count">${count} installs</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Chart.js graphics
+        function renderCharts(games, countryMap) {
+            // downloads graphic
+            const canvasDownloads = document.getElementById('chart-downloads');
+            if (canvasDownloads) {
+                const ctx = canvasDownloads.getContext('2d');
+                const titles = games.map(g => g.title);
+                const downloadsCounts = games.map(g => g.downloadsCount || 0);
+
+                if (chartDownloadsInstance) chartDownloadsInstance.destroy();
+
+                chartDownloadsInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: titles,
+                        datasets: [{
+                            label: 'Clicks de Descarga',
+                            data: downloadsCounts,
+                            backgroundColor: '#1D70F5',
+                            borderColor: '#1D70F5',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#8E96A4' }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#8E96A4', font: { weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // country pie-chart graphic
+            const canvasCountries = document.getElementById('chart-countries');
+            if (canvasCountries) {
+                const ctx = canvasCountries.getContext('2d');
+                const sortedCountryCounts = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                const labels = sortedCountryCounts.map(c => c[0]);
+                const counts = sortedCountryCounts.map(c => c[1]);
+
+                if (chartCountriesInstance) chartCountriesInstance.destroy();
+
+                chartCountriesInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: [
+                                '#1D70F5',
+                                '#10B981',
+                                '#F5C518',
+                                '#EF4444',
+                                '#8B5CF6'
+                            ],
+                            borderColor: 'transparent'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#8E96A4', boxWidth: 12 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ── Save Monetization Config ──
+        window.saveMonetizationConfig = async () => {
+            const adUrl = document.getElementById('cfg-ad-url').value;
+            const adCountdown = document.getElementById('cfg-countdown').value;
+
+            if (!adUrl) return alert("Escribe un enlace de publicidad válido");
 
             try {
-                await setDoc(doc(db, "config", "global"), { globalAdUrl: adUrl }, { merge: true });
-                alert("Anuncio Global Actualizado Exitosamente en Firebase!");
+                await setDoc(doc(db, "config", "global"), {
+                    globalAdUrl: adUrl,
+                    adCountdown: Number(adCountdown) || 5
+                }, { merge: true });
+                showToast("✅ ¡Configuración publicitaria actualizada correctamente!");
             } catch (e) {
-                alert("Error guardando en Firestore: " + e.message);
+                alert("Error al guardar: " + e.message);
             }
         };
 
-        window.guardarJuegoEnFirebase = async () => {
-            const nuevoJuego = {
-                title: document.getElementById('j-title').value,
-                category: document.getElementById('j-category').value,
-                size: document.getElementById('j-size').value,
-                rating: 5,
-                imageUrl: document.getElementById('j-image').value,
-                downloadUrl: document.getElementById('j-download').value,
-                description: document.getElementById('j-desc').value,
-                vip: document.getElementById('j-vip').value === "true",
-                timestamp: new Date().getTime() // Para ordenar los más recientes
+        // ── CRUD Actions ──
+        window.openModal = function (titleText = "Publicar Nueva App / Script", submitText = "Publicar") {
+            const m = document.getElementById('app-modal');
+            document.getElementById('modal-title-text').textContent = titleText;
+            document.getElementById('btn-submit-form').textContent = submitText;
+            m.classList.add('active');
+        };
+
+        window.closeModal = function () {
+            document.getElementById('app-modal').classList.remove('active');
+            editingId = null;
+            clearForm();
+        };
+
+        window.updateImagePreview = function (url) {
+            const previewImg = document.getElementById('preview-img');
+            const placeholder = document.getElementById('preview-placeholder');
+            if (url && url.startsWith('http')) {
+                previewImg.src = url;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                previewImg.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
+        };
+
+        function clearForm() {
+            document.getElementById('form-title').value = '';
+            document.getElementById('form-category').value = '';
+            document.getElementById('form-size').value = '';
+            document.getElementById('form-vip').value = 'false';
+            document.getElementById('form-image').value = '';
+            document.getElementById('form-download').value = '';
+            document.getElementById('form-desc').value = '';
+            updateImagePreview('');
+        }
+
+        // Submit button helper - Add / Edit Action
+        window.submitAppForm = async () => {
+            const fields = {
+                title: document.getElementById('form-title').value,
+                category: document.getElementById('form-category').value,
+                size: document.getElementById('form-size').value,
+                vip: document.getElementById('form-vip').value === 'true',
+                imageUrl: document.getElementById('form-image').value,
+                downloadUrl: document.getElementById('form-download').value,
+                description: document.getElementById('form-desc').value
             };
 
-            if (!nuevoJuego.title || !nuevoJuego.imageUrl || !nuevoJuego.downloadUrl) {
-                return alert("Llena al menos el titulo, imagen y link de descarga");
+            if (!fields.title || !fields.imageUrl || !fields.downloadUrl) {
+                return alert("Rellene al menos el Título, Icono de Imagen y Link de Descarga.");
             }
 
             try {
-                await addDoc(collection(db, "games"), nuevoJuego);
-                alert("¡App/Script publicado correctamente en Firestore!");
-                document.getElementById('j-title').value = '';
-                document.getElementById('j-desc').value = '';
-                document.getElementById('j-download').value = '';
-            } catch (e) {
-                alert("Error guardando en Firestore: " + e.message);
+                if (editingId) {
+                    // Update operation
+                    await setDoc(doc(db, "games", editingId), fields, { merge: true });
+                    showToast("💾 ¡App de Firebase actualizada correctamente!");
+                } else {
+                    // Create operation
+                    const cleanNewGameObject = {
+                        ...fields,
+                        rating: 5,
+                        downloadsCount: 0,
+                        timestamp: Date.now()
+                    };
+                    await addDoc(collection(db, "games"), cleanNewGameObject);
+                    showToast("✨ ¡App agregada e Indexada correctamente en Firestore!");
+                }
+                closeModal();
+            } catch (err) {
+                alert("Error guardando datos en Firestore: " + err.message);
             }
         };
 
-        // Al iniciar el script
-        loadConfig();
-    </script>
+        // Load Game into editing panel
+        window.editGame = async (gameId) => {
+            editingId = gameId;
+            const game = globalGames.find(g => g.id === gameId);
+            if (!game) return;
 
+            document.getElementById('form-title').value = game.title || '';
+            document.getElementById('form-category').value = game.category || '';
+            document.getElementById('form-size').value = game.size || '';
+            document.getElementById('form-vip').value = game.vip ? 'true' : 'false';
+            document.getElementById('form-image').value = game.imageUrl || '';
+            document.getElementById('form-download').value = game.downloadUrl || '';
+            document.getElementById('form-desc').value = game.description || '';
+
+            updateImagePreview(game.imageUrl);
+
+            // Switch view
+            openModal("Editar App / Script", "Guardar Cambios");
+        };
+
+        // Delete confirmation request
+        window.confirmDeleteGame = async (gameId, gameTitle) => {
+            if (confirm(`¿Está seguro que desea eliminar para siempre la entrada de "${gameTitle}" de Firebase Firestore?\nEsta acción no se puede deshacer.`)) {
+                try {
+                    await deleteDoc(doc(db, "games", gameId));
+                    showToast("🗑️ App eliminada exitosamente");
+                } catch (err) {
+                    alert("Error eliminando entrada de Firestore: " + err.message);
+                }
+            }
+        };
+
+        // Custom Toast messages
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
 </body>
 
 </html>

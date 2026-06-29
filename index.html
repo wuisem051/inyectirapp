@@ -1036,7 +1036,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, deleteDoc, getDocs, updateDoc, increment, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1127,9 +1127,15 @@
             document.getElementById('stat-favs').textContent = userFavs.size;
         }
 
+        window.currentAdUrl = "https://example.com/ad";
+        window.adCountdown = 5;
+
         /* ── Firebase data sync ── */
         onSnapshot(doc(db, "config", "global"), (snap) => {
-            if (snap.exists() && snap.data().globalAdUrl) window.currentAdUrl = snap.data().globalAdUrl;
+            if (snap.exists()) {
+                if (snap.data().globalAdUrl) window.currentAdUrl = snap.data().globalAdUrl;
+                if (snap.data().adCountdown !== undefined) window.adCountdown = Number(snap.data().adCountdown);
+            }
         });
 
         onSnapshot(collection(db, "games"), (snapshot) => {
@@ -1314,10 +1320,14 @@
 
         /* ── Ad trigger ── */
         window.triggerAd = function () {
+            if (window.currentAdUrl && window.currentAdUrl !== '#') {
+                window.open(window.currentAdUrl, '_blank');
+            }
+
             const adBtn = document.getElementById('ad-btn');
             adBtn.innerText = "VERIFICANDO...";
             adBtn.classList.add('disabled');
-            let count = 5;
+            let count = window.adCountdown || 5;
             const iv = setInterval(() => {
                 count--;
                 if (count > 0) { adBtn.innerText = "ESPERANDO " + count + "s..."; }
@@ -1334,9 +1344,30 @@
         /* ── Proceed download ── */
         window.proceedDownload = async function () {
             if (window.activeDownloadUrl && window.activeDownloadUrl !== '#') {
+                const game = globalGames[window.currentGameIndex];
+                if (!game) return;
+
+                try {
+                    // 1. Increment download count in game document
+                    const gameRef = doc(db, "games", game.id);
+                    await updateDoc(gameRef, { downloadsCount: increment(1) });
+
+                    // 2. Log download globally for statistics
+                    const country = localStorage.getItem('user_country') || 'Unknown';
+                    const countryCode = localStorage.getItem('user_country_code') || 'UN';
+                    await addDoc(collection(db, "downloads_log"), {
+                        gameId: game.id,
+                        gameTitle: game.title,
+                        country: country,
+                        countryCode: countryCode,
+                        timestamp: Date.now()
+                    });
+                } catch (e) {
+                    console.error("Error logging download count:", e);
+                }
+
                 // Save download history if logged in
                 if (currentUser) {
-                    const game = globalGames[window.currentGameIndex];
                     const dlRef = doc(db, "users", currentUser.uid, "downloads", game.id);
                     await setDoc(dlRef, { gameId: game.id, title: game.title, imageUrl: game.imageUrl, timestamp: Date.now() }, { merge: true });
                     if (!userDownloads.find(d => d.gameId === game.id)) {
@@ -1350,6 +1381,47 @@
                 showToast("❌ URL de descarga no disponible");
             }
         };
+
+        /* ── Track Install & Country ── */
+        async function trackInstall() {
+            if (localStorage.getItem('install_tracked')) {
+                return;
+            }
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                const country = data.country_name || 'Unknown';
+                const countryCode = data.country_code || 'UN';
+
+                localStorage.setItem('user_country', country);
+                localStorage.setItem('user_country_code', countryCode);
+
+                await addDoc(collection(db, "installs"), {
+                    country: country,
+                    countryCode: countryCode,
+                    timestamp: Date.now(),
+                    device: navigator.userAgent || 'Unknown'
+                });
+
+                localStorage.setItem('install_tracked', 'true');
+            } catch (e) {
+                console.error("GeoIP tracking error: ", e);
+                try {
+                    await addDoc(collection(db, "installs"), {
+                        country: 'Unknown',
+                        countryCode: 'UN',
+                        timestamp: Date.now(),
+                        device: navigator.userAgent || 'Unknown'
+                    });
+                    localStorage.setItem('install_tracked', 'true');
+                } catch (err) {
+                    console.error("Fallback install tracking failed", err);
+                }
+            }
+        }
+
+        // Initialize install tracking
+        trackInstall();
 
         /* ── Toast ── */
         window.showToast = function (msg) {
