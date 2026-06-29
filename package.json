@@ -1,0 +1,14 @@
+{
+  "name": "inyectorytapp",
+  "version": "1.0.0",
+  "description": "Inyector YT App Store client for Android",
+  "scripts": {
+    "build": "node copy-assets.js",
+    "sync": "npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/cli": "^6.1.0",
+    "@capacitor/core": "^6.1.0"
+  }
+}

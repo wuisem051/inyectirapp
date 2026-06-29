@@ -1,0 +1,8 @@
+{
+    "appId": "com.inyectoryt.app",
+    "appName": "Inyector YT",
+    "webDir": "www",
+    "server": {
+        "androidScheme": "https"
+    }
+}
