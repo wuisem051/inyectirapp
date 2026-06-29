@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -17,7 +17,8 @@
             --text-main: #FFFFFF;
             --text-muted: #8E96A4;
             --gold: #F5C518;
-            --badge-bg: rgba(29, 112, 245, 0.2);
+            --green: #10B981;
+            --red: #EF4444;
         }
 
         * {
@@ -32,6 +33,7 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             padding-bottom: 70px;
+            overflow-x: hidden;
         }
 
         .app-container {
@@ -43,7 +45,16 @@
             overflow-x: hidden;
         }
 
-        /* HEADER */
+        /* ─── VIEWS ─── */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* ─── HEADER ─── */
         header {
             display: flex;
             justify-content: space-between;
@@ -61,13 +72,29 @@
             color: var(--primary);
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+            display: none;
+            cursor: pointer;
+        }
+
         .search-icon svg {
             width: 20px;
             height: 20px;
             color: var(--text-muted);
         }
 
-        /* FEATURED SECTION */
+        /* ─── FEATURED ─── */
         .featured-container {
             padding: 0 20px;
             margin-bottom: 20px;
@@ -91,10 +118,7 @@
         .featured-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: linear-gradient(to bottom, rgba(11, 14, 20, 0.1) 0%, rgba(11, 14, 20, 0.95) 100%);
             z-index: 1;
         }
@@ -109,9 +133,6 @@
             padding: 4px 10px;
             border-radius: 12px;
             align-self: flex-start;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
 
         .featured-bottom {
@@ -161,7 +182,7 @@
             background-color: var(--primary);
         }
 
-        /* CATEGORIES */
+        /* ─── CATEGORIES ─── */
         .categories {
             display: flex;
             overflow-x: auto;
@@ -183,6 +204,8 @@
             font-weight: 600;
             white-space: nowrap;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
         }
 
         .cat-pill.active {
@@ -190,7 +213,7 @@
             color: white;
         }
 
-        /* LIST VIEW */
+        /* ─── CARDS LIST ─── */
         .list-container {
             padding: 0 20px;
             display: flex;
@@ -284,7 +307,7 @@
             pointer-events: none;
         }
 
-        /* ABSOLUTE CENTERED ELEMENTS FOR FIXING WIDE DESKTOP VIEW */
+        /* ─── BOTTOM NAV ─── */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -293,12 +316,12 @@
             margin: 0 auto;
             max-width: 480px;
             height: 65px;
-            background-color: rgba(18, 21, 28, 0.9);
+            background-color: rgba(18, 21, 28, 0.95);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
             z-index: 100;
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -312,6 +335,11 @@
             text-decoration: none;
             font-size: 10px;
             font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            transition: color 0.2s;
         }
 
         .nav-item.active {
@@ -324,13 +352,10 @@
             stroke-width: 2;
         }
 
-        /* DETAIL PAGE (FADE/SLIDE UP INSTEAD OF HORIZONTAL SLIDE TO PREVENT OVERFLOW BUGS) */
+        /* ─── DETAIL VIEW ─── */
         .detail-view {
             position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            inset: 0;
             margin: 0 auto;
             max-width: 480px;
             background-color: var(--bg-main);
@@ -479,7 +504,6 @@
         .ad-box-desc {
             font-size: 11px;
             color: #8E96A4;
-            margin-bottom: 0;
         }
 
         .det-about-title {
@@ -510,6 +534,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
         }
 
         .btn-giant {
@@ -535,86 +560,405 @@
             box-shadow: none;
             pointer-events: none;
         }
+
+        .btn-fav {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-fav.active {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .btn-fav svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* ─── DESCUBRIR VIEW ─── */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-subtitle {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .discover-hero {
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .discover-hero h2 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .discover-hero p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .new-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            margin-bottom: 4px;
+        }
+
+        /* ─── ARCHIVOS VIEW ─── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        /* ─── PERFIL VIEW ─── */
+        .profile-container {
+            padding: 20px;
+        }
+
+        .profile-logged-out {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .profile-logged-out .big-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .profile-logged-out h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .profile-logged-out p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-card);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-google:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            margin: 0 auto 12px auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-box-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-box-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .fav-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        /* ─── TOAST ─── */
+        #toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(30, 35, 45, 0.95);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="app-container" id="main-view">
-        <header>
-            <div class="header-title">INYECTOR <span>YT</span></div>
-            <div class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg></div>
-        </header>
+    <div class="app-container" id="app-root">
 
-        <div class="featured-container">
-            <div class="featured-card">
-                <div class="featured-badge">VIP SCRIPT</div>
-                <div class="featured-bottom">
-                    <div class="featured-title">FREE FIRE<br>MOD MENU</div>
-                    <button class="btn-primary"
-                        onclick="alert('Busca un juego de la lista para descargarlo')">EXPLORAR</button>
+        <!-- ═══════════════ INICIO VIEW ═══════════════ -->
+        <div class="view active" id="view-inicio">
+            <header>
+                <div class="header-title">INYECTOR <span>YT</span></div>
+                <div class="header-right">
+                    <img id="header-avatar" class="header-avatar" src="" alt="avatar" onclick="switchView('perfil')">
+                    <div class="search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                </div>
+            </header>
+
+            <div class="featured-container">
+                <div class="featured-card">
+                    <div class="featured-badge">VIP SCRIPT</div>
+                    <div class="featured-bottom">
+                        <div class="featured-title">FREE FIRE<br>MOD MENU</div>
+                        <button class="btn-primary" onclick="switchView('descubrir')">EXPLORAR</button>
+                    </div>
+                </div>
+                <div class="carousel-dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
                 </div>
             </div>
-            <div class="carousel-dots">
-                <div class="dot active"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+
+            <div class="categories" id="cats">
+                <div class="cat-pill active" onclick="filterCat('all', this)">Todos</div>
+                <div class="cat-pill" onclick="filterCat('vip', this)">VIP Mods</div>
+                <div class="cat-pill" onclick="filterCat('script', this)">Scripts</div>
+                <div class="cat-pill" onclick="filterCat('inyector', this)">Inyectores</div>
+            </div>
+
+            <div class="list-container" id="game-list">
+                <div style="text-align:center;color:#6b7280;padding:20px;">Sincronizando con Firebase...</div>
             </div>
         </div>
-        <div class="categories">
-            <div class="cat-pill active">Inyectores</div>
-            <div class="cat-pill">VIP Mods</div>
-            <div class="cat-pill">Scripts</div>
-            <div class="cat-pill">Nuevos</div>
-        </div>
-        <div class="list-container" id="game-list">
-            <div style="text-align:center;color:#6b7280;padding:20px;">Sincronizando con Firebase...</div>
-        </div>
-    </div>
 
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>Inicio</a>
-        <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-            </svg>Descubrir</a>
-        <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>Archivos</a>
-        <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>Perfil</a>
-    </nav>
+        <!-- ═══════════════ DESCUBRIR VIEW ═══════════════ -->
+        <div class="view" id="view-descubrir">
+            <header>
+                <div class="header-title">DESCUBRIR <span>YT</span></div>
+            </header>
+            <div class="discover-hero">
+                <h2>Novedades</h2>
+                <p>Las apps y scripts más recientes actualizados.</p>
+            </div>
+            <div class="list-container" id="discover-list">
+                <div style="text-align:center;color:#6b7280;padding:20px;">Cargando novedades...</div>
+            </div>
+        </div>
 
-    <!-- DETAIL VIEW MODAL -->
+        <!-- ═══════════════ ARCHIVOS VIEW ═══════════════ -->
+        <div class="view" id="view-archivos">
+            <header>
+                <div class="header-title">MIS <span>ARCHIVOS</span></div>
+            </header>
+            <div id="archivos-content">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <h3>Sin descargas aún</h3>
+                    <p>Las apps que descargues aparecerán aquí.<br>Inicia sesión para guardarlas en la nube.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ PERFIL VIEW ═══════════════ -->
+        <div class="view" id="view-perfil">
+            <header>
+                <div class="header-title">MI <span>PERFIL</span></div>
+            </header>
+            <div class="profile-container">
+                <!-- Estado: NO logueado -->
+                <div id="perfil-logged-out">
+                    <div class="profile-logged-out">
+                        <div class="big-icon">👤</div>
+                        <h2>Crea tu cuenta</h2>
+                        <p>Inicia sesión con Google para guardar tus apps favoritas, ver tu historial de descargas y
+                            mucho más.</p>
+                        <button class="btn-google" onclick="loginWithGoogle()">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                            Continuar con Google
+                        </button>
+                    </div>
+                </div>
+                <!-- Estado: Logueado -->
+                <div id="perfil-logged-in" style="display:none;">
+                    <div class="profile-card">
+                        <img id="perfil-pic" class="profile-pic" src="" alt="foto">
+                        <div class="profile-name" id="perfil-name">Usuario</div>
+                        <div class="profile-email" id="perfil-email">correo@email.com</div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <div class="stat-box-val" id="stat-downloads">0</div>
+                            <div class="stat-box-lbl">Descargas</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-val" id="stat-favs">0</div>
+                            <div class="stat-box-lbl">Favoritos</div>
+                        </div>
+                    </div>
+                    <div class="fav-section-title">❤️ Mis Favoritos</div>
+                    <div class="list-container" id="favs-list" style="padding:0; margin-bottom: 20px;">
+                        <div style="text-align:center;color:#6b7280;padding:20px 0;">Aún no tienes favoritos.</div>
+                    </div>
+                    <button class="btn-logout" onclick="logoutUser()">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /app-root -->
+
+    <!-- ═══ DETAIL VIEW (global overlay) ═══ -->
     <div class="detail-view" id="detail-view">
         <div class="detail-header-bar">
-            <button class="btn-icon" onclick="window.closeDetail()"><svg width="20" height="20" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="btn-icon" onclick="window.closeDetail()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="15 18 9 12 15 6"></polyline>
-                </svg></button>
+                </svg>
+            </button>
         </div>
-
         <div class="hero-img-wrap"><img src="" id="det-hero-img" alt="hero"></div>
-
         <div class="det-content">
             <div class="det-header-info">
                 <img src="" id="det-icon-img" class="det-app-icon">
                 <div>
-                    <h1 class="det-app-title" id="det-title">App Title</h1>
-                    <div class="det-app-dev" id="det-dev">Inyector Verified</div>
+                    <h1 class="det-app-title" id="det-title">App</h1>
+                    <div class="det-app-dev">Inyector Verified</div>
                 </div>
             </div>
-
             <div class="det-stats">
                 <div class="det-stat-item"><span class="ds-val" id="det-rating">5.0 ★</span><span
                         class="ds-lbl">Reviews</span></div>
@@ -624,35 +968,76 @@
                 <div class="det-stat-item"><span class="ds-val" id="det-cat">Mods</span><span
                         class="ds-lbl">Category</span></div>
             </div>
-
             <div class="ad-box">
                 <div class="ad-box-title">🔒 ENLACE PROTEGIDO</div>
                 <div class="ad-box-desc">Debes visitar a un patrocinador para desbloquear el enlace directo de descarga.
                 </div>
             </div>
-
             <div class="det-about-title">Acerca de esta app</div>
             <div class="det-desc" id="det-desc">Descripción...</div>
         </div>
-
         <div class="det-bottom-bar">
-            <button class="btn-giant" id="ad-btn" onclick="window.triggerAd()"><svg width="20" height="20"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="btn-fav" id="fav-btn" onclick="window.toggleFavorite()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                    </path>
+                </svg>
+            </button>
+            <button class="btn-giant" id="ad-btn" onclick="window.triggerAd()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg> DESBLOQUEAR ENLACE</button>
-            <button class="btn-giant disabled" id="dl-btn" style="display:none;" onclick="window.proceedDownload()"><svg
-                    width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                </svg>
+                DESBLOQUEAR ENLACE
+            </button>
+            <button class="btn-giant disabled" id="dl-btn" style="display:none;" onclick="window.proceedDownload()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg> INSTALAR</button>
+                </svg>
+                INSTALAR
+            </button>
         </div>
     </div>
 
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="nav-inicio" onclick="switchView('inicio')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>Inicio
+        </button>
+        <button class="nav-item" id="nav-descubrir" onclick="switchView('descubrir')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>Descubrir
+        </button>
+        <button class="nav-item" id="nav-archivos" onclick="switchView('archivos')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>Archivos
+        </button>
+        <button class="nav-item" id="nav-perfil" onclick="switchView('perfil')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>Perfil
+        </button>
+    </nav>
+
+    <!-- TOAST -->
+    <div id="toast"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgjOiWnr_-c4gOYoEiZc2Fc69F_4lKurQ",
@@ -664,68 +1049,214 @@
             measurementId: "G-696ZLYVZ4T"
         };
 
-        let db;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
         let globalGames = [];
+        let currentUser = null;
+        let userFavs = new Set();
+        let userDownloads = [];
         window.currentAdUrl = "https://example.com/ad";
         window.activeDownloadUrl = "";
+        window.currentGameIndex = null;
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            initFirebaseSync();
-        } catch (e) {
-            console.log("Firebase no configurado. Usando Mock Array de muestra.");
-            globalGames = [{
-                title: "FC Mobile VIP\nInyector Pro", imageUrl: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=150&auto=format&fit=crop",
-                rating: 5, category: "Deportes", size: "125 MB", vip: true,
-                description: "Mod desarrollado y actualizado. (Solo datos locales de ejemplo, FIREBASE NO CONFIGURADO)."
-            }];
-
-            // Timeout para que el DOM esté listo antes de renderizar (soluciona error de render muy rapido)
-            setTimeout(() => window.renderList(), 100);
-        }
-
-        function initFirebaseSync() {
-            onSnapshot(doc(db, "config", "global"), (docSnap) => {
-                if (docSnap.exists() && docSnap.data().globalAdUrl) { window.currentAdUrl = docSnap.data().globalAdUrl; }
-            });
-
-            onSnapshot(collection(db, "games"), (snapshot) => {
-                globalGames = [];
-                snapshot.forEach((doc) => { globalGames.push({ id: doc.id, ...doc.data() }); });
-                globalGames.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                window.renderList();
-            }, (error) => { console.error("Error: ", error); });
-        }
-
-        window.renderStars = function (count) { let h = ''; for (let i = 1; i <= 5; i++) { h += `<span class="star ${i > count ? 'dim' : ''}">★</span>`; } return h; }
-
-        window.renderList = function () {
-            const container = document.getElementById('game-list');
-            if (!container) return; // safeguard
-            if (globalGames.length === 0) {
-                container.innerHTML = `<div style="text-align:center;color:#6b7280;padding:20px;">No hay aplicaciones publicadas aún en tu base de datos Firestore.</div>`;
-                return;
+        /* ── Auth state ── */
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            updateProfileUI(user);
+            if (user) {
+                await loadUserData(user.uid);
+                renderFavs();
+                renderArchivos();
             }
-            container.innerHTML = globalGames.map((game, index) => {
-                const isVip = game.vip || (game.title && game.title.toLowerCase().includes('vip'));
-                return `
-            <div class="card" onclick="window.openDetail(${index})">
-                ${isVip ? '<div class="card-vip-badge">VIP</div>' : ''}
-                <img src="${game.imageUrl}" class="card-icon" alt="${game.title}">
-                <div class="card-info">
-                    <div class="card-title">${game.title.replace('\\n', '<br>')}</div>
-                    <div class="card-rating">${window.renderStars(game.rating || 5)}</div>
-                    <div class="card-sub">${game.category || 'Mods'} • Size: ${game.size || 'Varia'}</div>
-                </div>
-                <button class="card-btn">INFO</button>
-            </div>
-            `;
-            }).join('');
+        });
+
+        async function loadUserData(uid) {
+            const favsSnap = await getDocs(collection(db, "users", uid, "favorites"));
+            userFavs = new Set();
+            favsSnap.forEach(d => userFavs.add(d.id));
+
+            const dlSnap = await getDocs(collection(db, "users", uid, "downloads"));
+            userDownloads = [];
+            dlSnap.forEach(d => userDownloads.push({ id: d.id, ...d.data() }));
+            userDownloads.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        }
+
+        /* ── Login / Logout ── */
+        window.loginWithGoogle = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                showToast("✅ Sesión iniciada correctamente");
+            } catch (e) {
+                showToast("❌ Error al iniciar sesión");
+            }
         };
 
+        window.logoutUser = async () => {
+            await signOut(auth);
+            userFavs = new Set();
+            userDownloads = [];
+            showToast("👋 Sesión cerrada");
+        };
+
+        function updateProfileUI(user) {
+            const loggedOut = document.getElementById('perfil-logged-out');
+            const loggedIn = document.getElementById('perfil-logged-in');
+            const avatar = document.getElementById('header-avatar');
+
+            if (user) {
+                loggedOut.style.display = 'none';
+                loggedIn.style.display = 'block';
+                document.getElementById('perfil-pic').src = user.photoURL || '';
+                document.getElementById('perfil-name').textContent = user.displayName || 'Usuario';
+                document.getElementById('perfil-email').textContent = user.email || '';
+                avatar.src = user.photoURL || '';
+                avatar.style.display = 'block';
+            } else {
+                loggedOut.style.display = 'block';
+                loggedIn.style.display = 'none';
+                avatar.style.display = 'none';
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-downloads').textContent = userDownloads.length;
+            document.getElementById('stat-favs').textContent = userFavs.size;
+        }
+
+        /* ── Firebase data sync ── */
+        onSnapshot(doc(db, "config", "global"), (snap) => {
+            if (snap.exists() && snap.data().globalAdUrl) window.currentAdUrl = snap.data().globalAdUrl;
+        });
+
+        onSnapshot(collection(db, "games"), (snapshot) => {
+            globalGames = [];
+            snapshot.forEach(d => globalGames.push({ id: d.id, ...d.data() }));
+            globalGames.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderList(globalGames, 'game-list');
+            renderDiscover();
+        }, (err) => console.error(err));
+
+        /* ── View navigation ── */
+        window.switchView = function (name) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + name).classList.add('active');
+            document.getElementById('nav-' + name).classList.add('active');
+            if (name === 'descubrir') renderDiscover();
+            if (name === 'archivos') renderArchivos();
+            if (name === 'perfil') renderFavs();
+        };
+
+        /* ── Filter categories ── */
+        window.filterCat = function (cat, el) {
+            document.querySelectorAll('#cats .cat-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            let filtered = globalGames;
+            if (cat === 'vip') filtered = globalGames.filter(g => g.vip || (g.title && g.title.toLowerCase().includes('vip')));
+            else if (cat === 'script') filtered = globalGames.filter(g => g.category && g.category.toLowerCase().includes('script'));
+            else if (cat === 'inyector') filtered = globalGames.filter(g => g.category && g.category.toLowerCase().includes('inyect'));
+            renderList(filtered, 'game-list');
+        };
+
+        /* ── Render helpers ── */
+        window.renderStars = function (count) {
+            let h = '';
+            for (let i = 1; i <= 5; i++) h += `<span class="star ${i > count ? 'dim' : ''}">★</span>`;
+            return h;
+        };
+
+        function gameCardHTML(game, index, showNew = false) {
+            const isVip = game.vip || (game.title && game.title.toLowerCase().includes('vip'));
+            const newBadge = showNew ? `<span class="new-badge">NUEVO</span><br>` : '';
+            return `
+        <div class="card" onclick="window.openDetail(${index})">
+            ${isVip ? '<div class="card-vip-badge">VIP</div>' : ''}
+            <img src="${game.imageUrl}" class="card-icon" alt="${game.title}" onerror="this.src='https://via.placeholder.com/60'">
+            <div class="card-info">
+                ${newBadge}
+                <div class="card-title">${game.title.replace('\\n', '<br>')}</div>
+                <div class="card-rating">${window.renderStars(game.rating || 5)}</div>
+                <div class="card-sub">${game.category || 'Mods'} • ${game.size || 'Varia'}</div>
+            </div>
+            <button class="card-btn">INFO</button>
+        </div>`;
+        }
+
+        window.renderList = function (games, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!games || games.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:#6b7280;padding:20px;">No hay apps disponibles aún.</div>`;
+                return;
+            }
+            container.innerHTML = games.map((game, index) => gameCardHTML(game, globalGames.indexOf(game))).join('');
+        };
+
+        function renderDiscover() {
+            const container = document.getElementById('discover-list');
+            if (!container) return;
+            const recent = [...globalGames].slice(0, 20);
+            if (recent.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:#6b7280;padding:20px;">No hay novedades aún.</div>`;
+                return;
+            }
+            container.innerHTML = recent.map((game, i) => gameCardHTML(game, globalGames.indexOf(game), i < 3)).join('');
+        }
+
+        function renderArchivos() {
+            const container = document.getElementById('archivos-content');
+            if (!currentUser) {
+                container.innerHTML = `<div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <h3>Inicia sesión</h3>
+                <p>Necesitas una cuenta para guardar tu historial de descargas.</p>
+            </div>`;
+                return;
+            }
+            if (userDownloads.length === 0) {
+                container.innerHTML = `<div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <h3>Sin descargas aún</h3>
+                <p>Las apps que descargues aparecerán aquí.</p>
+            </div>`;
+                return;
+            }
+            const cards = userDownloads.map(dl => {
+                const idx = globalGames.findIndex(g => g.id === dl.gameId);
+                if (idx === -1) return '';
+                return gameCardHTML(globalGames[idx], idx);
+            }).join('');
+            container.innerHTML = `<div style="padding: 0 20px 70px;"><div class="section-title">Historial de Descargas</div><div class="list-container" style="padding:0;">${cards}</div></div>`;
+        }
+
+        function renderFavs() {
+            const container = document.getElementById('favs-list');
+            if (!container) return;
+            const favGames = globalGames.filter(g => userFavs.has(g.id));
+            document.getElementById('stat-favs').textContent = userFavs.size;
+            if (favGames.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:#6b7280;padding:20px 0;">Aún no tienes favoritos.</div>`;
+                return;
+            }
+            container.innerHTML = favGames.map(g => gameCardHTML(g, globalGames.indexOf(g))).join('');
+        }
+
+        /* ── Detail view ── */
         window.openDetail = function (index) {
             const g = globalGames[index];
+            window.currentGameIndex = index;
             document.getElementById('det-hero-img').src = "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=600&auto=format&fit=crop";
             document.getElementById('det-icon-img').src = g.imageUrl;
             document.getElementById('det-title').innerText = g.title.replace('\\n', ' ');
@@ -735,15 +1266,18 @@
             document.getElementById('det-desc').innerText = g.description || "Descarga la versión inyectada con las mejores modificaciones (Anti-ban incluido).";
             window.activeDownloadUrl = g.downloadUrl || '#';
 
+            // Fav button state
+            const favBtn = document.getElementById('fav-btn');
+            favBtn.classList.toggle('active', userFavs.has(g.id));
+
             document.getElementById('ad-btn').style.display = 'flex';
             document.getElementById('ad-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> DESBLOQUEAR ENLACE`;
             document.getElementById('ad-btn').classList.remove('disabled');
             document.getElementById('dl-btn').style.display = 'none';
 
             const dv = document.getElementById('detail-view');
-            dv.style.display = 'block'; // Make it display block so it overrides 'none'
-            // Pequeño retardo para dar tiempo al navegador de registrar el display:block antes de cambiar la opacidad
-            setTimeout(() => { dv.classList.add('active'); }, 10);
+            dv.style.display = 'block';
+            setTimeout(() => dv.classList.add('active'), 10);
             document.body.style.overflow = 'hidden';
         };
 
@@ -751,9 +1285,34 @@
             const dv = document.getElementById('detail-view');
             dv.classList.remove('active');
             document.body.style.overflow = '';
-            setTimeout(() => { dv.style.display = 'none'; }, 300); // Ocultar después de la animación
+            setTimeout(() => dv.style.display = 'none', 300);
         };
 
+        /* ── Favorites ── */
+        window.toggleFavorite = async function () {
+            if (!currentUser) {
+                showToast("⚠️ Inicia sesión para guardar favoritos");
+                return;
+            }
+            const game = globalGames[window.currentGameIndex];
+            const favRef = doc(db, "users", currentUser.uid, "favorites", game.id);
+            const favBtn = document.getElementById('fav-btn');
+
+            if (userFavs.has(game.id)) {
+                await deleteDoc(favRef);
+                userFavs.delete(game.id);
+                favBtn.classList.remove('active');
+                showToast("💔 Eliminado de favoritos");
+            } else {
+                await setDoc(favRef, { title: game.title, imageUrl: game.imageUrl, timestamp: Date.now() });
+                userFavs.add(game.id);
+                favBtn.classList.add('active');
+                showToast("❤️ Agregado a favoritos");
+            }
+            updateStats();
+        };
+
+        /* ── Ad trigger ── */
         window.triggerAd = function () {
             const adBtn = document.getElementById('ad-btn');
             adBtn.innerText = "VERIFICANDO...";
@@ -763,21 +1322,46 @@
                 count--;
                 if (count > 0) { adBtn.innerText = "ESPERANDO " + count + "s..."; }
                 else {
-                    clearInterval(iv); adBtn.style.display = 'none';
+                    clearInterval(iv);
+                    adBtn.style.display = 'none';
                     const dlBtn = document.getElementById('dl-btn');
-                    dlBtn.style.display = 'flex'; dlBtn.classList.remove('disabled');
+                    dlBtn.style.display = 'flex';
+                    dlBtn.classList.remove('disabled');
                 }
             }, 1000);
         };
 
-        window.proceedDownload = function () {
+        /* ── Proceed download ── */
+        window.proceedDownload = async function () {
             if (window.activeDownloadUrl && window.activeDownloadUrl !== '#') {
+                // Save download history if logged in
+                if (currentUser) {
+                    const game = globalGames[window.currentGameIndex];
+                    const dlRef = doc(db, "users", currentUser.uid, "downloads", game.id);
+                    await setDoc(dlRef, { gameId: game.id, title: game.title, imageUrl: game.imageUrl, timestamp: Date.now() }, { merge: true });
+                    if (!userDownloads.find(d => d.gameId === game.id)) {
+                        userDownloads.unshift({ gameId: game.id, title: game.title, imageUrl: game.imageUrl, timestamp: Date.now() });
+                    }
+                    updateStats();
+                    showToast("✅ Guardado en tus archivos");
+                }
                 window.location.href = window.activeDownloadUrl;
             } else {
-                alert('ConfigFirebase requerido para enlace real.');
+                showToast("❌ URL de descarga no disponible");
             }
         };
+
+        /* ── Toast ── */
+        window.showToast = function (msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2800);
+        };
+
+        window.showToast = window.showToast;
     </script>
+
 </body>
 
 </html>
