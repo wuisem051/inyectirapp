@@ -691,6 +691,92 @@
         .p-20 {
             padding: 20px;
         }
+
+        /* ── AUTOCOMPLETE DROPDOWN ── */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background-color: #1D2331;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            z-index: 9999;
+            max-height: 260px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .autocomplete-dropdown.open {
+            display: block;
+        }
+
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background-color: rgba(29, 112, 245, 0.15);
+        }
+
+        .autocomplete-item img {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .autocomplete-item-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .autocomplete-item-name {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .autocomplete-item-genre {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .autocomplete-loading {
+            padding: 14px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .autocomplete-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
     </style>
 </head>
 
@@ -854,9 +940,15 @@
             </div>
             <div class="modal-body">
                 <div class="form-grid">
-                    <div class="form-group">
+                    <div class="form-group full-width">
                         <label>Título del Juego o Script</label>
-                        <input type="text" id="form-title" placeholder="Ej: Free Fire VIP Mod">
+                        <div class="autocomplete-wrapper">
+                            <input type="text" id="form-title" placeholder="Escribe el nombre del juego..."
+                                oninput="onTitleInput(this.value)" autocomplete="off">
+                            <div class="autocomplete-dropdown" id="autocomplete-dropdown"></div>
+                        </div>
+                        <div class="autocomplete-hint">🔍 Escribe el nombre y aparecerán sugerencias de la tienda de
+                            apps para auto-rellenar el ícono y descripción.</div>
                     </div>
                     <div class="form-group">
                         <label>Categoría</label>
@@ -1344,6 +1436,98 @@
                 toast.classList.remove('show');
             }, 3000);
         }
+
+        // ── iTunes Search Autocomplete ──
+        let autocompleteTimer = null;
+
+        window.onTitleInput = function (value) {
+            clearTimeout(autocompleteTimer);
+            const dropdown = document.getElementById('autocomplete-dropdown');
+
+            if (value.trim().length < 3) {
+                dropdown.classList.remove('open');
+                return;
+            }
+
+            dropdown.innerHTML = '<div class="autocomplete-loading">🔍 Buscando en la tienda de apps...</div>';
+            dropdown.classList.add('open');
+
+            autocompleteTimer = setTimeout(() => searchApps(value.trim()), 600);
+        };
+
+        async function searchApps(query) {
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            try {
+                // Use iTunes Search API (free, no key, CORS-friendly, works for most mobile games)
+                const res = await fetch(
+                    `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=software&limit=8&country=us`
+                );
+                const data = await res.json();
+
+                if (!data.results || data.results.length === 0) {
+                    dropdown.innerHTML = '<div class="autocomplete-loading">Sin resultados. Escribe la URL de imagen manualmente.</div>';
+                    return;
+                }
+
+                dropdown.innerHTML = data.results.map((app, i) => {
+                    const icon = app.artworkUrl512 || app.artworkUrl100 || app.artworkUrl60 || '';
+                    const name = app.trackName || '';
+                    const genre = app.primaryGenreName || '';
+                    const desc = (app.description || '').substring(0, 200);
+                    const size = app.fileSizeBytes ? Math.round(app.fileSizeBytes / 1024 / 1024) + ' MB' : '';
+
+                    return `
+                        <div class="autocomplete-item" onclick="selectApp(
+                            ${JSON.stringify(name).replace(/'/g, "\\\'")},
+                            ${JSON.stringify(icon)},
+                            ${JSON.stringify(genre)},
+                            ${JSON.stringify(desc)},
+                            ${JSON.stringify(size)}
+                        )">
+                            <img src="${icon}" alt="${name}" onerror="this.src='https://via.placeholder.com/36'">
+                            <div class="autocomplete-item-info">
+                                <div class="autocomplete-item-name">${name}</div>
+                                <div class="autocomplete-item-genre">${genre}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                dropdown.innerHTML = '<div class="autocomplete-loading">Error buscando. Verifica tu conexión.</div>';
+            }
+        }
+
+        window.selectApp = function (name, icon, genre, desc, size) {
+            // Fill all related form fields automatically
+            document.getElementById('form-title').value = name;
+            document.getElementById('form-image').value = icon;
+            if (!document.getElementById('form-category').value) {
+                document.getElementById('form-category').value = genre;
+            }
+            if (!document.getElementById('form-desc').value) {
+                document.getElementById('form-desc').value = desc;
+            }
+            if (!document.getElementById('form-size').value && size) {
+                document.getElementById('form-size').value = size;
+            }
+
+            updateImagePreview(icon);
+
+            // Close dropdown
+            document.getElementById('autocomplete-dropdown').classList.remove('open');
+
+            showToast('✅ ¡Datos auto-rellenados desde la tienda de apps!');
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const wrapper = document.querySelector('.autocomplete-wrapper');
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
     </script>
 </body>
 
