@@ -1477,13 +1477,13 @@
                     const size = app.fileSizeBytes ? Math.round(app.fileSizeBytes / 1024 / 1024) + ' MB' : '';
 
                     return `
-                        <div class="autocomplete-item" onclick="selectApp(
-                            ${JSON.stringify(name).replace(/'/g, "\\\'")},
-                            ${JSON.stringify(icon)},
-                            ${JSON.stringify(genre)},
-                            ${JSON.stringify(desc)},
-                            ${JSON.stringify(size)}
-                        )">
+                        <div class="autocomplete-item" 
+                            data-name="${encodeURIComponent(name)}"
+                            data-icon="${encodeURIComponent(icon)}"
+                            data-genre="${encodeURIComponent(genre)}"
+                            data-desc="${encodeURIComponent(desc)}"
+                            data-size="${encodeURIComponent(size)}"
+                            onclick="selectApp(this)">
                             <img src="${icon}" alt="${name}" onerror="this.src='https://via.placeholder.com/36'">
                             <div class="autocomplete-item-info">
                                 <div class="autocomplete-item-name">${name}</div>
@@ -1498,7 +1498,13 @@
             }
         }
 
-        window.selectApp = function (name, icon, genre, desc, size) {
+        window.selectApp = function (el) {
+            const name = decodeURIComponent(el.getAttribute('data-name') || '');
+            const icon = decodeURIComponent(el.getAttribute('data-icon') || '');
+            const genre = decodeURIComponent(el.getAttribute('data-genre') || '');
+            const desc = decodeURIComponent(el.getAttribute('data-desc') || '');
+            const size = decodeURIComponent(el.getAttribute('data-size') || '');
+
             // Fill all related form fields automatically
             document.getElementById('form-title').value = name;
             document.getElementById('form-image').value = icon;
