@@ -836,25 +836,23 @@
             </header>
 
             <div class="featured-container">
-                <div class="featured-card">
-                    <div class="featured-badge">VIP SCRIPT</div>
+                <div class="featured-card" id="featured-card" style="transition: opacity 0.25s ease;">
+                    <div class="featured-badge" id="featured-badge">VIP SCRIPT</div>
                     <div class="featured-bottom">
-                        <div class="featured-title">FREE FIRE<br>MOD MENU</div>
-                        <button class="btn-primary" onclick="switchView('descubrir')">EXPLORAR</button>
+                        <div class="featured-title" id="featured-title">CARGANDO...</div>
+                        <button class="btn-primary" id="featured-btn">EXPLORAR</button>
                     </div>
                 </div>
-                <div class="carousel-dots">
+                <div class="carousel-dots" id="featured-dots">
                     <div class="dot active"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
                 </div>
             </div>
 
             <div class="categories" id="cats">
-                <div class="cat-pill active" onclick="filterCat('all', this)">Todos</div>
+                <div class="cat-pill active" onclick="filterCat('all', this)">Nuevos</div>
+                <div class="cat-pill" onclick="filterCat('inyector', this)">Inyectores</div>
                 <div class="cat-pill" onclick="filterCat('vip', this)">VIP Mods</div>
                 <div class="cat-pill" onclick="filterCat('script', this)">Scripts</div>
-                <div class="cat-pill" onclick="filterCat('inyector', this)">Inyectores</div>
             </div>
 
             <div class="list-container" id="game-list">
@@ -1138,12 +1136,81 @@
             }
         });
 
+        let carouselInterval = null;
+        let currentCarouselIndex = 0;
+        let carouselGames = [];
+
+        function initCarousel(games) {
+            carouselGames = games.slice(0, 3);
+            if (carouselGames.length === 0) return;
+
+            const dotsContainer = document.getElementById('featured-dots');
+            if (dotsContainer) {
+                dotsContainer.innerHTML = carouselGames.map((_, index) =>
+                    `<div class="dot ${index === 0 ? 'active' : ''}" onclick="window.setCarouselSlide(${index})"></div>`
+                ).join('');
+            }
+
+            currentCarouselIndex = 0;
+            showCarouselSlide(currentCarouselIndex);
+
+            if (carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(() => {
+                currentCarouselIndex = (currentCarouselIndex + 1) % carouselGames.length;
+                showCarouselSlide(currentCarouselIndex);
+            }, 4000);
+        }
+
+        window.setCarouselSlide = function (index) {
+            currentCarouselIndex = index;
+            showCarouselSlide(index);
+            if (carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(() => {
+                currentCarouselIndex = (currentCarouselIndex + 1) % carouselGames.length;
+                showCarouselSlide(currentCarouselIndex);
+            }, 4000);
+        };
+
+        function showCarouselSlide(index) {
+            const game = carouselGames[index];
+            if (!game) return;
+
+            const card = document.getElementById('featured-card');
+            const badge = document.getElementById('featured-badge');
+            const title = document.getElementById('featured-title');
+            const btn = document.getElementById('featured-btn');
+
+            if (card) {
+                card.style.opacity = '0.2';
+                setTimeout(() => {
+                    card.style.background = `linear-gradient(to bottom, rgba(11, 14, 20, 0.1) 0%, rgba(11, 14, 20, 0.95) 100%), url('${game.imageUrl}') center/cover no-repeat`;
+                    if (badge) {
+                        badge.innerText = game.vip ? "VIP SCRIPT" : "NUEVO";
+                        badge.style.backgroundColor = game.vip ? "var(--gold)" : "var(--primary)";
+                        badge.style.color = game.vip ? "black" : "white";
+                    }
+                    if (title) {
+                        title.innerHTML = game.title.replace('\\n', '<br>');
+                    }
+                    if (btn) {
+                        btn.onclick = () => window.openDetail(globalGames.indexOf(game));
+                    }
+                    card.style.opacity = '1';
+                }, 200);
+            }
+
+            document.querySelectorAll('#featured-dots .dot').forEach((dot, dotIdx) => {
+                dot.classList.toggle('active', dotIdx === index);
+            });
+        }
+
         onSnapshot(collection(db, "games"), (snapshot) => {
             globalGames = [];
             snapshot.forEach(d => globalGames.push({ id: d.id, ...d.data() }));
             globalGames.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             renderList(globalGames, 'game-list');
             renderDiscover();
+            initCarousel(globalGames);
         }, (err) => console.error(err));
 
         /* ── View navigation ── */
